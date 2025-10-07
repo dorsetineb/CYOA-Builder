@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CYOA Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'brand-bg': '#1a202c',
+              'brand-sidebar': '#232a38',
+              'brand-surface': '#2d3748',
+              'brand-border': '#4a5568',
+              'brand-text': '#e2e8f0',
+              'brand-text-dim': '#a0aec0',
+              'brand-primary': '#4fd1c5',
+              'brand-primary-hover': '#81e6d9',
+            },
+          },
+        },
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^18/",
+    "react": "https://aistudiocdn.com/react@^18",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^18/"
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=DotGothic16&family=Cutive+Mono&family=Inconsolata&family=Space+Mono&family=IBM+Plex+Mono&family=Chakra+Petch&family=Crimson+Text&display=swap" rel="stylesheet">
+<style>
+      /* Custom Checkbox Styles */
+      input[type="checkbox"].custom-checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        height: 1.1rem;
+        width: 1.1rem;
+        background-color: #2d3748; /* brand-surface */
+        border-radius: 0.25rem;
+        border: 2px solid #4a5568; /* brand-border */
+        display: inline-block;
+        vertical-align: middle;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+      }
+      input[type="checkbox"].custom-checkbox:focus {
+        outline: none;
+        box-shadow: none;
+      }
+      input[type="checkbox"].custom-checkbox:checked {
+        border-color: #4a5568; /* brand-border */
+        background-color: #ffffff; /* white */
+      }
+      input[type="checkbox"].custom-checkbox:checked::after {
+        content: '';
+        position: absolute;
+        /* Center the pseudo-element */
+        left: 50%;
+        top: 50%;
+        /* Define the checkmark shape */
+        width: 6px;
+        height: 12px;
+        border: solid #2C7A7B; /* darker aqua green */
+        border-width: 0 3px 3px 0;
+        /* Translate and rotate to center the shape visually */
+        transform: translate(-50%, -60%) rotate(45deg);
+      }
+      input[type="checkbox"].custom-checkbox:disabled {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      input[type="checkbox"].custom-checkbox:disabled:checked {
+        background-color: #4a5568;
+        border-color: #4a5568;
+      }
+      input[type="checkbox"].custom-checkbox:disabled:checked::after {
+        border-color: #a0aec0;
+      }
+    </style>
+</head>
+  <body class="bg-brand-bg text-brand-text">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

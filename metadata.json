@@ -1,0 +1,5 @@
+{
+  "name": "CYOA Builder",
+  "description": "Ferramenta projetada para criar e personalizar jogos baseados em texto (interactive fiction) de forma visual e sem a necessidade de programação.",
+  "requestFramePermissions": []
+}
