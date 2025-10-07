@@ -282,7 +282,7 @@ const SceneMap: React.FC<SceneMapProps> = ({ allScenesMap, startSceneId, onSelec
           <svg className="absolute" width={bounds.maxX - bounds.minX + NODE_WIDTH + X_GAP} height={bounds.maxY - bounds.minY + Y_GAP * 4} style={{ transform: `translate(${bounds.minX}px, ${bounds.minY}px)`, zIndex: 0 }}>
             <defs>
               <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#4fd1c5" />
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#8B5CF6" />
               </marker>
             </defs>
             {edges.map((edge, i) => {
@@ -325,7 +325,7 @@ const SceneMap: React.FC<SceneMapProps> = ({ allScenesMap, startSceneId, onSelec
                 <path
                   key={`${edge.source}-${edge.target}-${i}`}
                   d={d}
-                  stroke="#4fd1c5"
+                  stroke="#8B5CF6"
                   strokeWidth="2"
                   fill="none"
                   markerEnd="url(#arrow)"
