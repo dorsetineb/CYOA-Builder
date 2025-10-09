@@ -66,12 +66,12 @@ const gameHTML = `
                 </div>
             </div>
             <div class="text-panel">
+                <div class="diary-button-container">
+                    <button id="diary-button">Diário</button>
+                </div>
                 <div id="scene-description" class="scene-description"></div>
                 __CHANCES_CONTAINER__
                 <div id="choices-container" class="choices-container"></div>
-                 <div class="diary-button-container">
-                    <button id="diary-button">Diário</button>
-                </div>
             </div>
         </div>
     </div>
@@ -328,7 +328,7 @@ body.with-spacing .main-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 30px;
+    padding: 60px 30px 30px;
     position: relative;
 }
 
@@ -417,7 +417,7 @@ body.with-spacing .main-wrapper {
 .diary-button-container {
     position: absolute;
     top: 20px;
-    right: 20px;
+    right: 30px;
 }
 
 #diary-button {
