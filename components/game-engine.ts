@@ -182,7 +182,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentState.chances--;
                     renderChances();
                     if (currentState.chances <= 0) {
-                        onRenderCompleteCallback = () => showEnding('negative');
+                        onRenderCompleteCallback = () => {
+                            const gameOverButton = document.createElement('button');
+                            gameOverButton.textContent = "dessa vez, você perdeu";
+                            gameOverButton.className = 'btn-return-chance';
+                            gameOverButton.onclick = () => showEnding('negative');
+                            if (choicesContainer) choicesContainer.appendChild(gameOverButton);
+                        };
                     } else {
                         onRenderCompleteCallback = () => {
                             const returnButton = document.createElement('button');
