@@ -1,20 +1,22 @@
 
 
 
+
+
+
+
 import { GameData, Scene } from '../types';
 
 export const prepareGameDataForEngine = (data: GameData): object => {
     // Create a deep copy of scenes to avoid modifying the original data
     const scenesForEngine: { [id: string]: Partial<Scene> } = JSON.parse(JSON.stringify(data.scenes));
 
-    // The engine expects 'interactions', but we now use 'choices'.
-    // We can just pass the choices array as is, since the new engine will know how to handle it.
-    // No major transformation is needed here anymore, just passing the relevant data.
     return {
         cena_inicial: data.startScene,
         cenas: scenesForEngine,
         variables: data.variables, // Pass variables definition
-        gameEnableChances: data.gameEnableChances,
+        gameGameplaySystem: data.gameGameplaySystem || (data.gameEnableChances ? 'chances' : 'none'),
+        gameEnableChances: data.gameEnableChances, // Legacy support
         gameMaxChances: data.gameMaxChances,
         gameChanceIcon: data.gameChanceIcon,
         gameChanceIconColor: data.gameChanceIconColor,
@@ -33,6 +35,8 @@ export const prepareGameDataForEngine = (data: GameData): object => {
         negativeEndingDescription: data.negativeEndingDescription,
         gameRestartButtonText: data.gameRestartButtonText,
         gameContinueButtonText: data.gameContinueButtonText,
+        gameDiaryButtonText: data.gameDiaryButtonText,
+        gameTrackerButtonText: data.gameTrackerButtonText,
     };
 };
 
@@ -63,6 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const diaryModal = document.getElementById('diary-modal');
     const diaryLogElement = document.getElementById('diary-log');
     const diaryModalCloseButton = diaryModal ? diaryModal.querySelector('.modal-close-button') : null;
+    
+    const statusButton = document.getElementById('status-button');
+    const statusModal = document.getElementById('status-modal');
+    const statusListElement = document.getElementById('status-list');
+    const statusModalCloseButton = statusModal ? statusModal.querySelector('.modal-close-button') : null;
+
     const positiveEndingScreen = document.getElementById('positive-ending-screen');
     const negativeEndingScreen = document.getElementById('negative-ending-screen');
     const endingRestartButtons = document.querySelectorAll('.ending-restart-button');
@@ -161,7 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderChances() {
-        if (!gameData.gameEnableChances) return;
+        if (gameData.gameGameplaySystem !== 'chances' && gameData.gameGameplaySystem !== 'both') return;
+        
         const container = document.querySelector('.chances-container');
         if (!container) return;
         container.innerHTML = '';
@@ -190,6 +201,55 @@ document.addEventListener('DOMContentLoaded', () => {
             iconWrapper.innerHTML = iconSvg.replace(/%COLOR%/g, color);
             container.appendChild(iconWrapper);
         }
+    }
+
+    function renderStatus() {
+        if (!statusListElement) return;
+        statusListElement.innerHTML = '';
+
+        if (!gameData.variables || gameData.variables.length === 0) {
+            statusListElement.innerHTML = '<p style="text-align:center;color:var(--text-dim-color);padding:20px;">Nenhuma variável definida.</p>';
+            return;
+        }
+
+        const visibleVariables = gameData.variables.filter(v => v.visible !== false);
+        
+        if (visibleVariables.length === 0) {
+             statusListElement.innerHTML = '<p style="text-align:center;color:var(--text-dim-color);padding:20px;">Nenhum status visível.</p>';
+             return;
+        }
+
+        visibleVariables.forEach(v => {
+            const currentVal = currentState.variables[v.id] !== undefined ? currentState.variables[v.id] : v.initialValue;
+            let percentage = 0;
+            
+            if (v.isInverse) {
+                // Se é inverso (ex: Vida, Sanidade), o valor inicial é o máximo (100%).
+                // Se current > initial, capa em 100%. Se < 0, 0%.
+                const max = v.initialValue || 100; // Evita divisão por zero
+                percentage = (currentVal / max) * 100;
+            } else {
+                // Se é normal (ex: XP, Ouro), assume-se um cap de 100 para a barra, ou apenas cresce.
+                // Como não temos MaxValue definido pelo usuário para variáveis normais, vamos assumir 100 como base visual.
+                percentage = currentVal; 
+            }
+            
+            percentage = Math.max(0, Math.min(100, percentage));
+            const barColor = v.color || 'var(--accent-color)';
+
+            const item = document.createElement('div');
+            item.className = 'status-item';
+            item.innerHTML = \`
+                <div class="status-header">
+                    <span class="status-name">\${v.name}</span>
+                    <span class="status-value">\${currentVal}</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: \${percentage}%; background-color: \${barColor};"></div>
+                </div>
+            \`;
+            statusListElement.appendChild(item);
+        });
     }
 
     function showEnding(type) {
@@ -233,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         onRenderCompleteCallback = null;
         if(choicesContainer) choicesContainer.innerHTML = '';
 
-        if (!isStateLoad && !gameData.gameEnableChances && scene.removesChanceOnEntry) {
+        if (!isStateLoad && (gameData.gameGameplaySystem === 'chances' || gameData.gameGameplaySystem === 'both') && scene.removesChanceOnEntry) {
             if (sceneDescriptionElement) sceneDescriptionElement.innerHTML = '';
             showEnding('negative');
             return;
@@ -249,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     winButton.onclick = () => showEnding('positive');
                     if (choicesContainer) choicesContainer.appendChild(winButton);
                 };
-            } else if (gameData.gameEnableChances) {
+            } else if (gameData.gameGameplaySystem === 'chances' || gameData.gameGameplaySystem === 'both') {
                 if (scene.removesChanceOnEntry) {
                     currentState.chances--;
                     renderChances();
@@ -486,13 +546,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            if (gameData.gameEnableChances) {
+            if (gameData.gameGameplaySystem === 'chances' || gameData.gameGameplaySystem === 'both') {
                 currentState.chances = gameData.gameMaxChances;
             }
         }
         
+        // Setup Gameplay UI
+        if (gameData.gameGameplaySystem === 'variables' || gameData.gameGameplaySystem === 'both') {
+            if (statusButton) statusButton.classList.remove('hidden');
+        } else {
+             if (statusButton) statusButton.classList.add('hidden');
+        }
+        
         changeScene(currentState.currentSceneId, hasSave && !startFresh);
-        if(gameData.gameEnableChances) renderChances();
+        if(gameData.gameGameplaySystem === 'chances' || gameData.gameGameplaySystem === 'both') renderChances();
     }
     
     // --- Event Listeners ---
@@ -506,6 +573,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (diaryModalCloseButton) {
         diaryModalCloseButton.addEventListener('click', () => {
             if (diaryModal) diaryModal.classList.add('hidden');
+        });
+    }
+    
+    if (statusButton) {
+        statusButton.addEventListener('click', () => {
+            renderStatus();
+            if (statusModal) statusModal.classList.remove('hidden');
+        });
+    }
+
+    if (statusModalCloseButton) {
+        statusModalCloseButton.addEventListener('click', () => {
+            if (statusModal) statusModal.classList.add('hidden');
         });
     }
     

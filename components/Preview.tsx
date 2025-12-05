@@ -1,4 +1,6 @@
 
+
+
 import React, { useMemo } from 'react';
 import { GameData } from '../types';
 import { gameJS, prepareGameDataForEngine } from './game-engine';
@@ -23,7 +25,8 @@ const getFrameClass = (frame?: GameData['gameImageFrame']): string => {
 
 const Preview: React.FC<{ gameData: GameData }> = ({ gameData }) => {
     const srcDoc = useMemo(() => {
-        const chancesContainerHTML = gameData.gameEnableChances ? '<div id="chances-container" class="chances-container"></div>' : '';
+        const showChances = gameData.gameGameplaySystem === 'chances' || gameData.gameGameplaySystem === 'both' || (gameData.gameGameplaySystem === undefined && gameData.gameEnableChances);
+        const chancesContainerHTML = showChances ? '<div id="chances-container" class="chances-container"></div>' : '';
 
         const fontFamily = gameData.gameFontFamily || "'Silkscreen', sans-serif";
         const fontUrl = getFontUrl(fontFamily);
@@ -48,6 +51,8 @@ const Preview: React.FC<{ gameData: GameData }> = ({ gameData }) => {
             .replace(/__RESTART_BUTTON_TEXT__/g, gameData.gameRestartButtonText || 'Reiniciar Aventura')
             .replace('__ACTION_BUTTON_TEXT__', gameData.gameActionButtonText || 'Action')
             .replace('__VERB_INPUT_PLACEHOLDER__', gameData.gameVerbInputPlaceholder || 'What do you do?')
+            .replace(/__DIARY_BUTTON_TEXT__/g, gameData.gameDiaryButtonText || 'Diário')
+            .replace(/__TRACKER_BUTTON_TEXT__/g, gameData.gameTrackerButtonText || 'Status')
             .replace('__POSITIVE_ENDING_BG_STYLE__', gameData.positiveEndingImage ? `style="background-image: url('${gameData.positiveEndingImage}')"` : '')
             .replace('__POSITIVE_ENDING_ALIGN_CLASS__', gameData.positiveEndingContentAlignment === 'left' ? 'align-left' : '')
             .replace('__POSITIVE_ENDING_DESCRIPTION__', gameData.positiveEndingDescription || '')

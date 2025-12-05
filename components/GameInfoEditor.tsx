@@ -3,6 +3,10 @@
 
 
 
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { GameData, Variable } from '../types';
 import { UploadIcon } from './icons/UploadIcon';
@@ -33,7 +37,10 @@ interface GameInfoEditorProps {
   splashButtonText: string;
   continueButtonText: string;
   restartButtonText: string;
-  enableChances: boolean;
+  
+  gameGameplaySystem?: 'none' | 'chances' | 'variables' | 'both';
+  enableChances: boolean; // Deprecated prop but kept for compatibility
+  
   maxChances: number;
   textColor: string;
   titleColor: string;
@@ -49,6 +56,10 @@ interface GameInfoEditorProps {
   chanceReturnButtonText: string;
   gameWonButtonText: string;
   gameLostLastChanceButtonText: string;
+  
+  gameDiaryButtonText: string;
+  gameTrackerButtonText: string;
+
   gameTheme: 'dark' | 'light';
   textColorLight: string;
   titleColorLight: string;
@@ -166,10 +177,12 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         // UI props
         layoutOrientation, layoutOrder, imageFrame, splashButtonText, continueButtonText,
         restartButtonText, enableChances, maxChances,
+        gameGameplaySystem,
         textColor, titleColor, splashButtonColor, splashButtonHoverColor,
         splashButtonTextColor, actionButtonColor, actionButtonTextColor,
         focusColor, chanceIconColor, gameFontFamily, chanceIcon,
         chanceReturnButtonText, gameWonButtonText, gameLostLastChanceButtonText,
+        gameDiaryButtonText, gameTrackerButtonText,
         gameTheme, textColorLight, titleColorLight, focusColorLight,
         frameBookColor, frameTradingCardColor, frameChamferedColor,
         frameRoundedTopColor, gameSceneNameOverlayBg, gameSceneNameOverlayTextColor,
@@ -199,8 +212,10 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
     const [localSplashButtonText, setLocalSplashButtonText] = useState(splashButtonText);
     const [localContinueButtonText, setLocalContinueButtonText] = useState(continueButtonText);
     const [localRestartButtonText, setLocalRestartButtonText] = useState(restartButtonText);
-    const [localEnableChances, setLocalEnableChances] = useState(enableChances);
+    
+    const [localGameplaySystem, setLocalGameplaySystem] = useState(gameGameplaySystem || (enableChances ? 'chances' : 'none'));
     const [localMaxChances, setLocalMaxChances] = useState(maxChances);
+    
     const [localTextColor, setLocalTextColor] = useState(textColor);
     const [localTitleColor, setLocalTitleColor] = useState(titleColor);
     const [localSplashButtonColor, setLocalSplashButtonColor] = useState(splashButtonColor);
@@ -215,6 +230,10 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
     const [localChanceReturnButtonText, setLocalChanceReturnButtonText] = useState(chanceReturnButtonText);
     const [localGameWonButtonText, setLocalGameWonButtonText] = useState(gameWonButtonText);
     const [localGameLostLastChanceButtonText, setLocalGameLostLastChanceButtonText] = useState(gameLostLastChanceButtonText);
+    
+    const [localGameDiaryButtonText, setLocalGameDiaryButtonText] = useState(gameDiaryButtonText);
+    const [localGameTrackerButtonText, setLocalGameTrackerButtonText] = useState(gameTrackerButtonText);
+
     const [localGameTheme, setLocalGameTheme] = useState(gameTheme);
     const [localTextColorLight, setLocalTextColorLight] = useState(textColorLight);
     const [localTitleColorLight, setLocalTitleColorLight] = useState(titleColorLight);
@@ -253,7 +272,7 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         setLocalSplashButtonText(splashButtonText);
         setLocalContinueButtonText(continueButtonText);
         setLocalRestartButtonText(restartButtonText);
-        setLocalEnableChances(enableChances);
+        setLocalGameplaySystem(gameGameplaySystem || (enableChances ? 'chances' : 'none'));
         setLocalMaxChances(maxChances);
         setLocalTextColor(textColor);
         setLocalTitleColor(titleColor);
@@ -269,6 +288,8 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         setLocalChanceReturnButtonText(chanceReturnButtonText);
         setLocalGameWonButtonText(gameWonButtonText);
         setLocalGameLostLastChanceButtonText(gameLostLastChanceButtonText);
+        setLocalGameDiaryButtonText(gameDiaryButtonText);
+        setLocalGameTrackerButtonText(gameTrackerButtonText);
         setLocalGameTheme(gameTheme);
         setLocalTextColorLight(textColorLight);
         setLocalTitleColorLight(titleColorLight);
@@ -284,9 +305,12 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         title, logo, omitSplashTitle, splashImage, splashContentAlignment, splashDescription,
         positiveEndingImage, positiveEndingContentAlignment, positiveEndingDescription,
         negativeEndingImage, negativeEndingContentAlignment, negativeEndingDescription,
-        layoutOrientation, layoutOrder, imageFrame, splashButtonText, continueButtonText, restartButtonText, enableChances, maxChances,
+        layoutOrientation, layoutOrder, imageFrame, splashButtonText, continueButtonText, restartButtonText, 
+        gameGameplaySystem, enableChances, maxChances,
         textColor, titleColor, splashButtonColor, splashButtonHoverColor, splashButtonTextColor, actionButtonColor, actionButtonTextColor, focusColor,
-        chanceIconColor, gameFontFamily, chanceIcon, chanceReturnButtonText, gameWonButtonText, gameLostLastChanceButtonText, gameTheme, textColorLight, titleColorLight, focusColorLight,
+        chanceIconColor, gameFontFamily, chanceIcon, chanceReturnButtonText, gameWonButtonText, gameLostLastChanceButtonText, 
+        gameDiaryButtonText, gameTrackerButtonText,
+        gameTheme, textColorLight, titleColorLight, focusColorLight,
         frameBookColor, frameTradingCardColor, frameChamferedColor,
         frameRoundedTopColor, gameSceneNameOverlayBg, gameSceneNameOverlayTextColor
     ]);
@@ -322,7 +346,7 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
             localSplashButtonText !== splashButtonText ||
             localContinueButtonText !== continueButtonText ||
             localRestartButtonText !== restartButtonText ||
-            localEnableChances !== enableChances ||
+            localGameplaySystem !== (gameGameplaySystem || (enableChances ? 'chances' : 'none')) ||
             localMaxChances !== maxChances ||
             localTextColor !== textColor ||
             localTitleColor !== titleColor ||
@@ -338,6 +362,8 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
             localChanceReturnButtonText !== chanceReturnButtonText ||
             localGameWonButtonText !== gameWonButtonText ||
             localGameLostLastChanceButtonText !== gameLostLastChanceButtonText ||
+            localGameDiaryButtonText !== gameDiaryButtonText ||
+            localGameTrackerButtonText !== gameTrackerButtonText ||
             localGameTheme !== gameTheme ||
             localTextColorLight !== textColorLight ||
             localTitleColorLight !== titleColorLight ||
@@ -354,8 +380,11 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         localTitle, localLogo, localOmitSplashTitle, localSplashImage, localSplashContentAlignment, localSplashDescription,
         localPositiveEndingImage, localPositiveEndingContentAlignment, localPositiveEndingDescription,
         localNegativeEndingImage, localNegativeEndingContentAlignment, localNegativeEndingDescription,
-        localLayoutOrientation, localLayoutOrder, localImageFrame, localSplashButtonText, localContinueButtonText, localRestartButtonText, localEnableChances, localMaxChances,
-        localTextColor, localTitleColor, localSplashButtonColor, localSplashButtonHoverColor, localSplashButtonTextColor, localActionButtonColor, localActionButtonTextColor, localFocusColor, localChanceIconColor, localFontFamily, localChanceIcon, localChanceReturnButtonText, localGameWonButtonText, localGameLostLastChanceButtonText, localGameTheme, localTextColorLight, localTitleColorLight, localFocusColorLight,
+        localLayoutOrientation, localLayoutOrder, localImageFrame, localSplashButtonText, localContinueButtonText, localRestartButtonText, 
+        localGameplaySystem, gameGameplaySystem, enableChances, localMaxChances,
+        localTextColor, localTitleColor, localSplashButtonColor, localSplashButtonHoverColor, localSplashButtonTextColor, localActionButtonColor, localActionButtonTextColor, localFocusColor, localChanceIconColor, localFontFamily, localChanceIcon, localChanceReturnButtonText, localGameWonButtonText, localGameLostLastChanceButtonText, 
+        localGameDiaryButtonText, localGameTrackerButtonText,
+        localGameTheme, localTextColorLight, localTitleColorLight, localFocusColorLight,
         localFrameBookColor, localFrameTradingCardColor, localFrameChamferedColor,
         localFrameRoundedTopColor, localGameSceneNameOverlayBg, localGameSceneNameOverlayTextColor,
         props, onSetDirty
@@ -383,7 +412,13 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         if (localSplashButtonText !== splashButtonText) onUpdate('gameSplashButtonText', localSplashButtonText);
         if (localContinueButtonText !== continueButtonText) onUpdate('gameContinueButtonText', localContinueButtonText);
         if (localRestartButtonText !== restartButtonText) onUpdate('gameRestartButtonText', localRestartButtonText);
-        if (localEnableChances !== enableChances) onUpdate('gameEnableChances', localEnableChances);
+        
+        if (localGameplaySystem !== (gameGameplaySystem || (enableChances ? 'chances' : 'none'))) {
+             onUpdate('gameGameplaySystem', localGameplaySystem);
+             // Backwards compatibility
+             onUpdate('gameEnableChances', localGameplaySystem === 'chances' || localGameplaySystem === 'both');
+        }
+        
         if (localMaxChances !== maxChances) onUpdate('gameMaxChances', localMaxChances);
         if (localTextColor !== textColor) onUpdate('gameTextColor', localTextColor);
         if (localTitleColor !== titleColor) onUpdate('gameTitleColor', localTitleColor);
@@ -399,6 +434,10 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         if (localChanceReturnButtonText !== chanceReturnButtonText) onUpdate('gameChanceReturnButtonText', localChanceReturnButtonText);
         if (localGameWonButtonText !== gameWonButtonText) onUpdate('gameWonButtonText', localGameWonButtonText);
         if (localGameLostLastChanceButtonText !== gameLostLastChanceButtonText) onUpdate('gameLostLastChanceButtonText', localGameLostLastChanceButtonText);
+        
+        if (localGameDiaryButtonText !== gameDiaryButtonText) onUpdate('gameDiaryButtonText', localGameDiaryButtonText);
+        if (localGameTrackerButtonText !== gameTrackerButtonText) onUpdate('gameTrackerButtonText', localGameTrackerButtonText);
+        
         if (localGameTheme !== gameTheme) onUpdate('gameTheme', localGameTheme);
         if (localTextColorLight !== textColorLight) onUpdate('gameTextColorLight', localTextColorLight);
         if (localTitleColorLight !== titleColorLight) onUpdate('gameTitleColorLight', localTitleColorLight);
@@ -433,7 +472,7 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         setLocalSplashButtonText(splashButtonText);
         setLocalContinueButtonText(continueButtonText);
         setLocalRestartButtonText(restartButtonText);
-        setLocalEnableChances(enableChances);
+        setLocalGameplaySystem(gameGameplaySystem || (enableChances ? 'chances' : 'none'));
         setLocalMaxChances(maxChances);
         setLocalTextColor(textColor);
         setLocalTitleColor(titleColor);
@@ -449,6 +488,8 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
         setLocalChanceReturnButtonText(chanceReturnButtonText);
         setLocalGameWonButtonText(gameWonButtonText);
         setLocalGameLostLastChanceButtonText(gameLostLastChanceButtonText);
+        setLocalGameDiaryButtonText(gameDiaryButtonText);
+        setLocalGameTrackerButtonText(gameTrackerButtonText);
         setLocalGameTheme(gameTheme);
         setLocalTextColorLight(textColorLight);
         setLocalTitleColorLight(titleColorLight);
@@ -775,19 +816,30 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
                   </div>
 
                   <div className="pt-6 border-t border-brand-border/50">
-                      <h3 className="text-lg font-semibold text-brand-text mb-4">Sistema de Chances (Vidas)</h3>
-                      <div className="flex items-center">
-                          <input 
-                              type="checkbox" 
-                              id="enableChances" 
-                              checked={localEnableChances} 
-                              onChange={(e) => setLocalEnableChances(e.target.checked)}
-                              className="custom-checkbox"
-                          />
-                          <label htmlFor="enableChances" className="ml-2 text-sm text-brand-text-dim">Habilitar sistema de chances</label>
+                      <h3 className="text-lg font-semibold text-brand-text mb-4">Mecânica de Jogo</h3>
+                      <div className="space-y-4">
+                        <div>
+                              <p className="text-sm text-brand-text-dim mb-3">
+                                Escolha se o jogador deve ter vidas limitadas ou se deve rastrear variáveis (como inventário, status) ou ambos.
+                              </p>
+                             <label htmlFor="gameplay-select" className="block text-sm font-medium text-brand-text-dim mb-1">Modo de Jogo</label>
+                             <select
+                                  id="gameplay-select"
+                                  value={localGameplaySystem}
+                                  onChange={(e) => setLocalGameplaySystem(e.target.value as any)}
+                                  className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 focus:ring-0"
+                              >
+                                  <option value="none">Nenhum (Apenas Narrativa)</option>
+                                  <option value="chances">Vidas / Chances</option>
+                                  <option value="variables">Variáveis / Rastreadores</option>
+                                  <option value="both">Ambos</option>
+                              </select>
+                        </div>
                       </div>
-                      {localEnableChances && (
+
+                      {(localGameplaySystem === 'chances' || localGameplaySystem === 'both') && (
                           <div className="mt-4 pl-6 border-l-2 border-brand-border/50">
+                              <h4 className="text-md font-semibold text-brand-text mb-3">Configuração de Vidas</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-4">
                                   <div>
                                       <label htmlFor="maxChances" className="block text-sm font-medium text-brand-text-dim mb-1">Número de Chances</label>
@@ -849,6 +901,30 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
                               />
                           </div>
                           <div>
+                              <label htmlFor="gameDiaryButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão Diário</label>
+                              <input
+                                  type="text"
+                                  id="gameDiaryButtonText"
+                                  value={localGameDiaryButtonText}
+                                  onChange={(e) => setLocalGameDiaryButtonText(e.target.value)}
+                                  className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 focus:ring-0"
+                                  placeholder="Diário"
+                              />
+                          </div>
+                          {(localGameplaySystem === 'variables' || localGameplaySystem === 'both') && (
+                              <div>
+                                  <label htmlFor="gameTrackerButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Status</label>
+                                  <input
+                                      type="text"
+                                      id="gameTrackerButtonText"
+                                      value={localGameTrackerButtonText}
+                                      onChange={(e) => setLocalGameTrackerButtonText(e.target.value)}
+                                      className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 focus:ring-0"
+                                      placeholder="Status"
+                                  />
+                              </div>
+                          )}
+                          <div>
                               <label htmlFor="restartButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Reiniciar (Fim de Jogo)</label>
                               <input
                                   type="text"
@@ -859,7 +935,7 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
                                   placeholder="Reiniciar Aventura"
                               />
                           </div>
-                          {localEnableChances && (
+                          {(localGameplaySystem === 'chances' || localGameplaySystem === 'both') && (
                             <div>
                                 <label htmlFor="chanceReturnButton" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Tentar Novamente</label>
                                 <p className="text-xs text-brand-text-dim mb-2">Aparece após perder uma chance.</p>
@@ -873,7 +949,7 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
                                 />
                             </div>
                           )}
-                           {localEnableChances && (
+                           {(localGameplaySystem === 'chances' || localGameplaySystem === 'both') && (
                             <div>
                                 <label htmlFor="gameLostLastChanceButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Perda Final</label>
                                 <p className="text-xs text-brand-text-dim mb-2">Aparece ao perder a última chance.</p>
@@ -1053,7 +1129,7 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
                         </div>
                       </>
                     )}
-                     {enableChances && (
+                     {(localGameplaySystem === 'chances' || localGameplaySystem === 'both') && (
                         <div className="pt-6 border-t border-brand-border/50">
                             <h3 className="text-lg font-semibold text-brand-text mb-4">Cor do Ícone de Chance</h3>
                             <div className="space-y-6 mt-4">
@@ -1093,10 +1169,18 @@ const GameInfoEditor: React.FC<GameInfoEditorProps> = (props) => {
                             </div>
                             {/* Text Panel Mock */}
                             <div className="w-3/5 flex flex-col">
-                                <h1 className="text-xl" style={{ color: localGameTheme === 'dark' ? localTitleColor : localTitleColorLight }}>Título do Jogo</h1>
+                                <div className="flex justify-between items-start">
+                                    <h1 className="text-xl" style={{ color: localGameTheme === 'dark' ? localTitleColor : localTitleColorLight }}>Título do Jogo</h1>
+                                    <div className="flex gap-2">
+                                         <button className="text-xs border px-2 py-1 rounded" style={{borderColor: localGameTheme === 'dark' ? '#30363d' : '#d0d7de', color: localGameTheme === 'dark' ? localTextColor : localTextColorLight}}>{localGameDiaryButtonText}</button>
+                                         {(localGameplaySystem === 'variables' || localGameplaySystem === 'both') && (
+                                            <button className="text-xs border px-2 py-1 rounded" style={{borderColor: localGameTheme === 'dark' ? '#30363d' : '#d0d7de', color: localGameTheme === 'dark' ? localTextColor : localTextColorLight}}>{localGameTrackerButtonText}</button>
+                                         )}
+                                    </div>
+                                </div>
                                 <p className="text-sm mt-2" style={{ color: localGameTheme === 'dark' ? localTextColor : localTextColorLight }}>Esta é uma descrição de exemplo para a cena.</p>
                                 <p className="mt-2 text-sm italic" style={{ color: localGameTheme === 'dark' ? '#8b949e' : '#57606a' }}>&gt; comando de exemplo</p>
-                                {enableChances && (
+                                {(localGameplaySystem === 'chances' || localGameplaySystem === 'both') && (
                                 <div className="flex gap-1 mt-auto">
                                     <ChanceIcon type={localChanceIcon} color={localChanceIconColor} />
                                     <ChanceIcon type={localChanceIcon} color={localChanceIconColor} />

@@ -4,7 +4,9 @@ export interface Variable {
   id: string;
   name: string;
   initialValue: number;
-  type: 'number'; // Por enquanto, suporte apenas a números para simplificar a UI
+  isInverse?: boolean; // Se true, começa em 100% (baseado no valor inicial) e desce. Se false, começa em 0 (ou valor inicial) e sobe até 100.
+  visible?: boolean; // Se deve aparecer no painel de status
+  color?: string; // Cor da barra de progresso
 }
 
 export interface Condition {
@@ -88,13 +90,22 @@ export interface GameData {
   gameActionButtonColor?: string;
   gameActionButtonTextColor?: string;
   gameFocusColor?: string;
-  gameEnableChances?: boolean;
+  
+  // New Gameplay System
+  gameGameplaySystem?: 'none' | 'chances' | 'variables' | 'both';
+  gameEnableChances?: boolean; // Deprecated, kept for migration
+  
   gameMaxChances?: number;
   gameChanceIcon?: 'circle' | 'cross' | 'heart';
   gameChanceIconColor?: string;
   gameChanceReturnButtonText?: string;
   gameWonButtonText?: string;
   gameLostLastChanceButtonText?: string;
+  
+  // Custom Button Texts
+  gameDiaryButtonText?: string;
+  gameTrackerButtonText?: string;
+
   gameTheme?: 'dark' | 'light';
   gameTextColorLight?: string;
   gameTitleColorLight?: string;

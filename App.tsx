@@ -66,8 +66,9 @@ const gameHTML = `
                 </div>
             </div>
             <div class="text-panel">
-                <div class="diary-button-container">
-                    <button id="diary-button">Diário</button>
+                <div class="top-buttons-container">
+                    <button id="diary-button">__DIARY_BUTTON_TEXT__</button>
+                    <button id="status-button" class="hidden">__TRACKER_BUTTON_TEXT__</button>
                 </div>
                 <div id="scene-description" class="scene-description"></div>
                 __CHANCES_CONTAINER__
@@ -80,8 +81,17 @@ const gameHTML = `
     <div id="diary-modal" class="modal-overlay hidden">
         <div class="modal-content diary-modal-content">
             <button class="modal-close-button">&times;</button>
-            <h2>Diário</h2>
+            <h2>__DIARY_BUTTON_TEXT__</h2>
             <div id="diary-log" class="diary-log"></div>
+        </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div id="status-modal" class="modal-overlay hidden">
+        <div class="modal-content status-modal-content">
+            <button class="modal-close-button">&times;</button>
+            <h2>__TRACKER_BUTTON_TEXT__</h2>
+            <div id="status-list" class="status-list"></div>
         </div>
     </div>
 </body>
@@ -109,7 +119,7 @@ body.dark-theme {
     --button-bg: #21262d;
     --button-hover-bg: #30363d;
     .choice-button { font-size: 1em; }
-    #diary-button { font-size: 1em; }
+    #diary-button, #status-button { font-size: 1em; }
 }
 
 body.light-theme {
@@ -126,7 +136,7 @@ body.light-theme {
     --button-bg: #f6f8fa;
     --button-hover-bg: #e5e7eb;
     .choice-button { font-size: 1em; }
-    #diary-button { font-size: 1em; }
+    #diary-button, #status-button { font-size: 1em; }
 }
 
 :root {
@@ -142,6 +152,10 @@ body.light-theme {
     --splash-content-align-items: flex-end;
     --scene-name-overlay-bg: __SCENE_NAME_OVERLAY_BG__;
     --scene-name-overlay-text-color: __SCENE_NAME_OVERLAY_TEXT_COLOR__;
+    --frame-book-cover: 10px solid __FRAME_BOOK_COLOR__ !important;
+    --frame-trading-card: __FRAME_TRADING_CARD_COLOR__;
+    --frame-chamfered: __FRAME_CHAMFERED_COLOR__;
+    --frame-rounded-top: __FRAME_ROUNDED_TOP_COLOR__;
 }
 
 /* Reset and base styles */
@@ -418,13 +432,15 @@ body.with-spacing .main-wrapper {
     transform: translateX(5px);
 }
 
-.diary-button-container {
+.top-buttons-container {
     position: absolute;
     top: 20px;
     right: 30px;
+    display: flex;
+    gap: 10px;
 }
 
-#diary-button {
+#diary-button, #status-button {
     font-family: var(--font-family);
     padding: 8px 12px;
     border: 2px solid var(--border-color);
@@ -435,12 +451,12 @@ body.with-spacing .main-wrapper {
     font-size: 1em;
 }
 
-#diary-button:hover {
+#diary-button:hover, #status-button:hover {
     background-color: var(--border-color);
     border-color: var(--text-dim-color);
 }
 
-/* Diary Modal */
+/* Modal */
 .hidden { display: none !important; }
 .modal-overlay {
     position: fixed;
@@ -478,13 +494,15 @@ body.with-spacing .main-wrapper {
     cursor: pointer;
     line-height: 1;
 }
-.diary-modal-content {
+.diary-modal-content, .status-modal-content {
     max-width: 80vw;
     height: 80vh;
     display: flex;
     flex-direction: column;
 }
-.diary-log { flex-grow: 1; overflow-y: auto; text-align: left; }
+.diary-log, .status-list { flex-grow: 1; overflow-y: auto; text-align: left; }
+
+/* Diary Styles */
 .diary-entry {
     display: flex;
     gap: 15px;
@@ -528,6 +546,35 @@ body.with-spacing .main-wrapper {
     text-decoration: none;
 }
 
+/* Status Styles */
+.status-item {
+    margin-bottom: 20px;
+}
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+.status-name {
+    font-weight: bold;
+    color: var(--text-color);
+}
+.status-value {
+    color: var(--text-dim-color);
+}
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+}
 
 /* Transition Overlay */
 .transition-overlay {
@@ -577,7 +624,7 @@ body.with-spacing .main-wrapper {
 }
 .frame-rounded-top .image-panel {
     padding: 10px;
-    background: __FRAME_ROUNDED_TOP_COLOR__;
+    background: var(--frame-rounded-top);
     border: none !important;
     border-radius: 150px 150px 6px 6px;
     box-shadow: none;
@@ -590,7 +637,7 @@ body.with-spacing .main-wrapper {
 .frame-book-cover .image-panel {
     padding: 15px;
     background: var(--bg-color);
-    border: 10px solid __FRAME_BOOK_COLOR__ !important;
+    border: var(--frame-book-cover);
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 .frame-book-cover .image-container {
@@ -599,7 +646,7 @@ body.with-spacing .main-wrapper {
 
 .frame-trading-card .image-panel {
     padding: 8px;
-    background: __FRAME_TRADING_CARD_COLOR__;
+    background: var(--frame-trading-card);
     border-right-color: transparent;
     border-radius: 20px;
 }
@@ -613,7 +660,7 @@ body.with-spacing .main-wrapper {
 
 .frame-chamfered .image-panel {
     padding: 10px;
-    background: __FRAME_CHAMFERED_COLOR__;
+    background: var(--frame-chamfered);
     border: none !important;
     clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0 calc(100% - 15px), 0 15px);
 }
@@ -631,185 +678,69 @@ body.font-adjust-gothic {
 }
 
 /* Custom Scrollbar */
-.scene-description::-webkit-scrollbar, .diary-log::-webkit-scrollbar {
+.scene-description::-webkit-scrollbar, .diary-log::-webkit-scrollbar, .status-list::-webkit-scrollbar {
   width: 12px;
 }
-.scene-description::-webkit-scrollbar-track, .diary-log::-webkit-scrollbar-track {
+.scene-description::-webkit-scrollbar-track, .diary-log::-webkit-scrollbar-track, .status-list::-webkit-scrollbar-track {
   background: var(--panel-bg); 
 }
-.scene-description::-webkit-scrollbar-thumb, .diary-log::-webkit-scrollbar-thumb {
+.scene-description::-webkit-scrollbar-thumb, .diary-log::-webkit-scrollbar-thumb, .status-list::-webkit-scrollbar-thumb {
   background-color: var(--text-dim-color);
   border-radius: 6px;
   border: 3px solid var(--panel-bg);
 }
-.scene-description::-webkit-scrollbar-thumb:hover, .diary-log::-webkit-scrollbar-thumb:hover {
+.scene-description::-webkit-scrollbar-thumb:hover, .diary-log::-webkit-scrollbar-thumb:hover, .status-list::-webkit-scrollbar-thumb:hover {
   background-color: var(--text-color);
 }
 `;
 
 const initialScenes: { [id: string]: Scene } = {
-  // --- Começo ---
-  "scene_start": {
-    id: "scene_start",
-    name: "A Cela",
-    description: "Você está em uma cela de masmorra fria e úmida. A porta de madeira é velha e parece fraca. Uma pequena janela com grades fica no alto da parede, fora de alcance. Há uma pilha de feno em um canto.",
+  "scene_room": {
+    id: "scene_room",
+    name: "Quarto 404",
+    description: "Sua cabeça lateja. Você acorda em um quarto de hotel desconhecido e luxuoso. A luz da tarde entra pelas frestas da cortina. A porta principal parece trancada eletronicamente.",
     image: "",
     choices: [
-      { id: 'choice_1', text: "Tentar forçar a porta.", goToScene: 'scene_corridor_barulhento' },
-      { id: 'choice_2', text: "Examinar a pilha de feno.", goToScene: 'scene_cela_com_chave' }
+      { id: 'c1', text: "Vasculhar o banheiro.", goToScene: 'scene_bathroom' },
+      { id: 'c2', text: "Olhar debaixo da cama.", goToScene: 'scene_bed' },
+      { id: 'c3', text: "Tentar arrombar a porta.", goToScene: 'scene_door_fail' }
     ]
   },
-  "scene_cela_com_chave": {
-    id: "scene_cela_com_chave",
-    name: "A Cela (com chave)",
-    description: "Você remexe no feno e, para sua surpresa, encontra uma chave de ferro, velha e enferrujada. Parece ser a chave da sua cela.",
+  "scene_bathroom": {
+    id: "scene_bathroom",
+    name: "O Banheiro",
+    description: "O banheiro é de mármore branco. Sobre a pia, ao lado de sabonetes intocados, você vê um cartão magnético de acesso jogado displicentemente.",
     image: "",
     choices: [
-      { id: 'choice_3', text: "Usar a chave na porta.", goToScene: 'scene_corridor_silencioso' },
-      { id: 'choice_4', text: "Ignorar a chave e forçar a porta.", goToScene: 'scene_corridor_barulhento' }
+      { id: 'c4', text: "Pegar o cartão e tentar a porta.", goToScene: 'scene_corridor' },
+      { id: 'c5', text: "Voltar para o quarto.", goToScene: 'scene_room' }
     ]
   },
-  // --- Corredores ---
-  "scene_corridor_barulhento": {
-    id: "scene_corridor_barulhento",
-    name: "Corredor (Barulhento)",
-    description: "Você se joga contra a porta. Com um estalo alto, a madeira cede e você está livre! O barulho, no entanto, ecoou pelo corredor silencioso. O corredor se divide à sua frente.",
+  "scene_bed": {
+    id: "scene_bed",
+    name: "Debaixo da Cama",
+    description: "Você se abaixa. Há apenas poeira, uma garrafa de água vazia e um chinelo solitário. Nada que ajude na fuga.",
     image: "",
     choices: [
-      { id: 'choice_5', text: "Seguir pela esquerda, em direção a uma luz.", goToScene: 'scene_sala_guarda_alertado' },
-      { id: 'choice_6', text: "Seguir pela direita, para a escuridão.", goToScene: 'scene_arsenal' }
+      { id: 'c6', text: "Levantar e continuar procurando.", goToScene: 'scene_room' }
     ]
   },
-  "scene_corridor_silencioso": {
-    id: "scene_corridor_silencioso",
-    name: "Corredor (Silencioso)",
-    description: "A chave gira com um rangido. A porta se abre, revelando um corredor escuro. Você está fora da cela sem fazer barulho. O corredor se divide à sua frente.",
+  "scene_door_fail": {
+    id: "scene_door_fail",
+    name: "A Porta Trancada",
+    description: "Você joga o peso do corpo contra a madeira envernizada. Nem se mexe. O painel eletrônico pisca uma luz vermelha zombeteira.",
     image: "",
     choices: [
-      { id: 'choice_7', text: "Seguir pela esquerda, em direção a uma luz.", goToScene: 'scene_sala_guarda_dormindo' },
-      { id: 'choice_8', text: "Seguir pela direita, para a escuridão.", goToScene: 'scene_arsenal' }
+      { id: 'c7', text: "Desistir da força bruta.", goToScene: 'scene_room' }
     ]
   },
-  // --- Salas do Meio ---
-  "scene_arsenal": {
-    id: "scene_arsenal",
-    name: "Arsenal",
-    description: "Você encontra um pequeno arsenal. Há uma espada curta em uma prateleira e uma tocha apagada em um suporte na parede.",
-    image: "",
-    choices: [
-      { id: 'choice_9', text: "Pegar a espada e continuar.", goToScene: 'scene_saida_com_espada' },
-      { id: 'choice_10', text: "Pegar a tocha e continuar.", goToScene: 'scene_saida_com_tocha' },
-      { id: 'choice_11', text: "Ignorar os itens e continuar.", goToScene: 'scene_saida_sem_nada' }
-    ]
-  },
-  "scene_sala_guarda_alertado": {
-    id: "scene_sala_guarda_alertado",
-    name: "Sala da Guarda (Alertado)",
-    description: "Você entra em uma sala e dá de cara com um guarda, que foi alertado pelo barulho que você fez. Ele puxa a espada e avança!",
-    image: "",
-    choices: [
-      { id: 'choice_12', text: "Lutar com as próprias mãos.", goToScene: 'scene_fim_morte_guarda' },
-      { id: 'choice_13', text: "Tentar fugir de volta para o corredor.", goToScene: 'scene_fim_morte_guarda' }
-    ]
-  },
-  "scene_sala_guarda_dormindo": {
-    id: "scene_sala_guarda_dormindo",
-    name: "Sala da Guarda (Dormindo)",
-    description: "Você entra sorrateiramente em uma sala. Um guarda está dormindo em uma cadeira, com a cabeça sobre a mesa. A chave da saída está pendurada em seu cinto.",
-    image: "",
-    choices: [
-      { id: 'choice_14', text: "Tentar pegar a chave silenciosamente.", goToScene: 'scene_saida_com_chave_saida' },
-      { id: 'choice_15', text: "Deixá-lo em paz e procurar outra saída (pela direita).", goToScene: 'scene_arsenal' }
-    ]
-  },
-  // --- Caminhos para o Fim ---
-  "scene_saida_com_espada": {
-    id: "scene_saida_com_espada",
-    name: "Porta de Saída (com Espada)",
-    description: "Você chega ao final do corredor e encontra uma porta trancada. Não há como abri-la. De repente, um guarda aparece vindo da outra direção!",
-    image: "",
-    choices: [
-      { id: 'choice_16', text: "Lutar com o guarda usando a espada.", goToScene: 'scene_fim_morte_guarda_armado' },
-      { id: 'choice_17', text: "Tentar se render.", goToScene: 'scene_fim_morte_rendicao' }
-    ]
-  },
-  "scene_saida_com_tocha": {
-    id: "scene_saida_com_tocha",
-    name: "Porta de Saída (com Tocha)",
-    description: "Você chega a uma porta de madeira maciça. Ao lado, há um buraco escuro na parede, cheirando a mofo. A tocha que você carrega pode iluminar o caminho.",
-    image: "",
-    choices: [
-      { id: 'choice_18', text: "Entrar no buraco escuro com a tocha.", goToScene: 'scene_passagem_secreta' },
-      { id: 'choice_19', text: "Ignorar o buraco e tentar a porta.", goToScene: 'scene_saida_sem_nada' }
-    ]
-  },
-  "scene_passagem_secreta": {
-    id: "scene_passagem_secreta",
-    name: "Passagem Secreta",
-    description: "A tocha ilumina uma passagem estreita e empoeirada. Você a segue e, para sua surpresa, encontra uma escada que sobe em direção à luz do luar.",
-    image: "",
-    choices: [
-      { id: 'choice_20', text: "Subir a escada para a liberdade!", goToScene: 'scene_fim_liberdade' }
-    ]
-  },
-  "scene_saida_sem_nada": {
-    id: "scene_saida_sem_nada",
-    name: "Porta de Saída (Sem Nada)",
-    description: "Você chega a uma porta de madeira maciça, trancada. Você não tem como abri-la. Seus esforços foram em vão. Você ouve passos se aproximando...",
-    image: "",
-    choices: [
-      { id: 'choice_21', text: "Esperar o inevitável.", goToScene: 'scene_fim_morte_capturado' }
-    ]
-  },
-  "scene_saida_com_chave_saida": {
-    id: "scene_saida_com_chave_saida",
-    name: "Porta de Saída (com Chave)",
-    description: "Com as mãos trêmulas, você pega a chave do cinto do guarda adormecido. Ela se encaixa perfeitamente na grande porta de saída no final do corredor. Você está a um passo da liberdade.",
-    image: "",
-    choices: [
-      { id: 'choice_22', text: "Abrir a porta e fugir.", goToScene: 'scene_fim_liberdade' }
-    ]
-  },
-  // --- Finais ---
-  "scene_fim_liberdade": {
-    id: "scene_fim_liberdade",
-    name: "Liberdade!",
-    description: "Você abre a porta e respira o ar fresco da noite. Você está livre! A masmorra ficou para trás.",
+  "scene_corridor": {
+    id: "scene_corridor",
+    name: "Corredor (Liberdade)",
+    description: "O cartão desliza suavemente. A luz fica verde e a tranca estala. Você abre a porta e sente o ar condicionado do corredor. O elevador está logo ali. Você conseguiu sair.",
     image: "",
     choices: [],
     isEndingScene: true
-  },
-  "scene_fim_morte_guarda": {
-    id: "scene_fim_morte_guarda",
-    name: "Fim da Linha (Luta)",
-    description: "O guarda é mais forte e mais rápido. Sua tentativa de fuga termina aqui, de forma abrupta.",
-    image: "",
-    choices: [],
-    removesChanceOnEntry: true
-  },
-  "scene_fim_morte_guarda_armado": {
-    id: "scene_fim_morte_guarda_armado",
-    name: "Fim da Linha (Armado)",
-    description: "Mesmo com uma espada, o guarda é um soldado treinado. Ele desvia de seu ataque desajeitado e o derruba. Sua aventura termina aqui.",
-    image: "",
-    choices: [],
-    removesChanceOnEntry: true
-  },
-  "scene_fim_morte_rendicao": {
-    id: "scene_fim_morte_rendicao",
-    name: "Fim da Linha (Rendição)",
-    description: "Você joga a espada no chão e levanta as mãos. O guarda não está interessado em prisioneiros. Fim da linha.",
-    image: "",
-    choices: [],
-    removesChanceOnEntry: true
-  },
-  "scene_fim_morte_capturado": {
-    id: "scene_fim_morte_capturado",
-    name: "Fim da Linha (Capturado)",
-    description: "Guardas chegam e encontram você na porta trancada. Você é jogado de volta na sua cela, desta vez com segurança reforçada. Não há mais escapatória.",
-    image: "",
-    choices: [],
-    removesChanceOnEntry: true
   }
 };
 
@@ -854,7 +785,7 @@ const initializeGameData = (): GameData => {
     });
 
     const newSceneOrder = initialSceneOrder.map(oldId => sceneIdMap[oldId]);
-    const newStartScene = sceneIdMap["scene_start"];
+    const newStartScene = sceneIdMap["scene_room"];
     
     return {
         startScene: newStartScene,
@@ -863,16 +794,16 @@ const initializeGameData = (): GameData => {
         variables: [], // Initialize empty variables
         gameHTML: gameHTML,
         gameCSS: gameCSS,
-        gameTitle: "Fuga da Masmorra",
-        gameFontFamily: "'Silkscreen', sans-serif",
+        gameTitle: "Fuga do Hotel",
+        gameFontFamily: "'Crimson Text', serif",
         gameLogo: "", // base64 string
         gameSplashImage: "", // base64 string
         gameSplashContentAlignment: 'right',
-        gameSplashDescription: "Uma aventura de escolhas em uma masmorra escura.",
+        gameSplashDescription: "Você acorda em um quarto trancado. Você consegue sair?",
         gameTextColor: "#c9d1d9",
         gameTitleColor: "#58a6ff",
         gameOmitSplashTitle: false,
-        gameSplashButtonText: "COMEÇAR",
+        gameSplashButtonText: "ACORDAR",
         gameContinueButtonText: "CONTINUAR",
         gameRestartButtonText: "RECOMEÇAR",
         gameSplashButtonColor: "#8B5CF6",
@@ -884,6 +815,7 @@ const initializeGameData = (): GameData => {
         gameActionButtonColor: '#ffffff',
         gameActionButtonTextColor: '#0d1117',
         gameFocusColor: '#58a6ff',
+        gameGameplaySystem: 'chances',
         gameEnableChances: true,
         gameMaxChances: 1,
         gameChanceIcon: 'heart',
@@ -891,16 +823,18 @@ const initializeGameData = (): GameData => {
         gameChanceReturnButtonText: "Tentar Novamente",
         gameWonButtonText: "Você venceu!",
         gameLostLastChanceButtonText: "Dessa vez, você perdeu",
+        gameDiaryButtonText: "Diário",
+        gameTrackerButtonText: "Status",
         gameTheme: 'dark',
         gameTextColorLight: '#24292f',
         gameTitleColorLight: '#0969da',
         gameFocusColorLight: '#0969da',
         positiveEndingImage: "",
         positiveEndingContentAlignment: 'right',
-        positiveEndingDescription: "Você encontrou um final feliz!",
+        positiveEndingDescription: "Você encontrou o caminho para fora!",
         negativeEndingImage: "",
         negativeEndingContentAlignment: 'right',
-        negativeEndingDescription: "Você não sobreviveu...",
+        negativeEndingDescription: "Fim da linha.",
         frameBookColor: '#FFFFFF',
         frameTradingCardColor: '#FFFFFF',
         frameChamferedColor: '#FFFFFF',
@@ -949,6 +883,7 @@ const createNewGameData = (): GameData => {
         gameActionButtonColor: '#ffffff',
         gameActionButtonTextColor: '#0d1117',
         gameFocusColor: '#58a6ff',
+        gameGameplaySystem: 'chances',
         gameEnableChances: true,
         gameMaxChances: 3,
         gameChanceIcon: 'heart',
@@ -956,6 +891,8 @@ const createNewGameData = (): GameData => {
         gameChanceReturnButtonText: "Tentar Novamente",
         gameWonButtonText: "Você venceu!",
         gameLostLastChanceButtonText: "Fim de Jogo",
+        gameDiaryButtonText: "Diário",
+        gameTrackerButtonText: "Status",
         gameTheme: 'dark',
         gameTextColorLight: '#24292f',
         gameTitleColorLight: '#0969da',
@@ -1226,7 +1163,11 @@ const App: React.FC = () => {
             splashButtonText={gameData.gameSplashButtonText || 'INICIAR AVENTURA'}
             continueButtonText={gameData.gameContinueButtonText || 'Continuar Aventura'}
             restartButtonText={gameData.gameRestartButtonText || 'Reiniciar Aventura'}
+            
+            // Updated props
+            gameGameplaySystem={gameData.gameGameplaySystem || (gameData.gameEnableChances ? 'chances' : 'none')}
             enableChances={gameData.gameEnableChances || false}
+            
             maxChances={gameData.gameMaxChances || 3}
             textColor={gameData.gameTextColor || '#c9d1d9'}
             titleColor={gameData.gameTitleColor || '#58a6ff'}
@@ -1242,6 +1183,9 @@ const App: React.FC = () => {
             chanceReturnButtonText={gameData.gameChanceReturnButtonText || ''}
             gameWonButtonText={gameData.gameWonButtonText || ''}
             gameLostLastChanceButtonText={gameData.gameLostLastChanceButtonText || ''}
+            gameDiaryButtonText={gameData.gameDiaryButtonText || 'Diário'}
+            gameTrackerButtonText={gameData.gameTrackerButtonText || 'Status'}
+            
             gameTheme={gameData.gameTheme || 'dark'}
             textColorLight={gameData.gameTextColorLight || '#24292f'}
             titleColorLight={gameData.gameTitleColorLight || '#0969da'}

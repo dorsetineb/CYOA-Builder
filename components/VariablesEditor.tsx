@@ -27,7 +27,9 @@ const VariablesEditor: React.FC<VariablesEditorProps> = ({ variables, onUpdateVa
       id: `var_${Date.now()}`,
       name: 'Nova Variável',
       initialValue: 0,
-      type: 'number'
+      isInverse: false,
+      visible: true,
+      color: '#3b82f6' // Default Blue
     };
     setLocalVariables([...localVariables, newVar]);
   };
@@ -70,15 +72,26 @@ const VariablesEditor: React.FC<VariablesEditorProps> = ({ variables, onUpdateVa
           
           {localVariables.length > 0 ? (
             <div className="space-y-2">
-              <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-bold text-brand-text-dim border-b border-brand-border">
-                  <div className="col-span-5">Nome da Variável</div>
-                  <div className="col-span-3 text-center">Valor Inicial</div>
-                  <div className="col-span-3 text-center">Tipo</div>
+              <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-bold text-brand-text-dim items-end">
+                  <div className="col-span-1 text-center">Cor</div>
+                  <div className="col-span-4">Nome da Variável</div>
+                  <div className="col-span-2 text-center">Valor Inicial</div>
+                  <div className="col-span-2 text-center">Inverter</div>
+                  <div className="col-span-2 text-center">Visível no Jogo</div>
                   <div className="col-span-1"></div>
               </div>
               {localVariables.map((variable) => (
                 <div key={variable.id} className="grid grid-cols-12 gap-4 items-center bg-brand-bg border border-brand-border rounded-md p-3">
-                  <div className="col-span-5">
+                  <div className="col-span-1 flex justify-center">
+                    <input
+                      type="color"
+                      value={variable.color || '#3b82f6'}
+                      onChange={(e) => handleUpdateVariable(variable.id, 'color', e.target.value)}
+                      className="w-8 h-8 p-0 border-none rounded cursor-pointer bg-transparent"
+                      title="Cor da barra de progresso"
+                    />
+                  </div>
+                  <div className="col-span-4">
                     <input
                       type="text"
                       value={variable.name}
@@ -87,7 +100,7 @@ const VariablesEditor: React.FC<VariablesEditorProps> = ({ variables, onUpdateVa
                       placeholder="Nome (ex: Moedas)"
                     />
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <input
                       type="number"
                       value={variable.initialValue}
@@ -95,8 +108,23 @@ const VariablesEditor: React.FC<VariablesEditorProps> = ({ variables, onUpdateVa
                       className="w-full bg-brand-surface border border-brand-border rounded-md px-3 py-2 text-sm text-center focus:ring-0"
                     />
                   </div>
-                   <div className="col-span-3 text-center text-sm text-brand-text-dim bg-brand-surface/50 py-2 rounded">
-                      Número
+                  <div className="col-span-2 flex justify-center">
+                      <input
+                          type="checkbox"
+                          checked={variable.isInverse || false}
+                          onChange={(e) => handleUpdateVariable(variable.id, 'isInverse', e.target.checked)}
+                          className="custom-checkbox"
+                          title="Cálculo Inverso: Se marcado, a barra começa cheia (100%) e diminui conforme o valor cai."
+                      />
+                  </div>
+                  <div className="col-span-2 flex justify-center">
+                      <input
+                          type="checkbox"
+                          checked={variable.visible !== false}
+                          onChange={(e) => handleUpdateVariable(variable.id, 'visible', e.target.checked)}
+                          className="custom-checkbox"
+                          title="Visível no Painel: Se marcado, aparecerá no menu de Status do jogo."
+                      />
                   </div>
                   <div className="col-span-1 flex justify-end">
                     <button
