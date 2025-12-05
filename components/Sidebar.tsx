@@ -1,12 +1,15 @@
 
-import React from 'react';
+
+
+
+import React, { useState } from 'react';
 import SceneList from './SceneList';
 import { Scene, View } from '../types';
-import { CodeIcon } from './icons/CodeIcon';
 import { BookOpenIcon } from './icons/BookOpenIcon';
 import { InformationCircleIcon } from './icons/InformationCircleIcon';
 import { MapIcon } from './icons/MapIcon';
-import { DocumentPlusIcon } from './icons/DocumentPlusIcon';
+import { AdjustmentsHorizontalIcon } from './icons/AdjustmentsHorizontalIcon';
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
 
 interface SidebarProps {
   scenes: Scene[];
@@ -23,6 +26,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = (props) => {
   const { currentView, onSetView, scenes, onNewGame, ...sceneListProps } = props;
+  const [isScenesExpanded, setIsScenesExpanded] = useState(true);
 
   const getButtonClass = (view: View) => 
     `w-full flex items-center p-2 rounded-md transition-colors text-left ${
@@ -30,6 +34,15 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         ? 'bg-brand-primary/20 text-brand-primary' 
         : 'hover:bg-brand-border/50'
     }`;
+    
+  const handleScenesClick = () => {
+    if (currentView === 'scenes') {
+        setIsScenesExpanded(!isScenesExpanded);
+    } else {
+        onSetView('scenes');
+        setIsScenesExpanded(true);
+    }
+  }
 
   return (
     <aside className="w-1/4 xl:w-1/5 bg-brand-sidebar p-4 border-r border-brand-border flex flex-col">
@@ -38,21 +51,22 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
           <InformationCircleIcon className="w-5 h-5 mr-3" />
           <span className="font-semibold">Informações do Jogo</span>
         </button>
-        <button className={getButtonClass('interface')} onClick={() => onSetView('interface')}>
-          <CodeIcon className="w-5 h-5 mr-3" />
-          <span className="font-semibold">Interface</span>
-        </button>
       
         {/* Scene Editor Section */}
         <div>
-            <button className={getButtonClass('scenes')} onClick={() => onSetView('scenes')}>
-                <BookOpenIcon className="w-5 h-5 mr-3" />
-                <span className="font-semibold">Editor de Cenas</span>
-                <span className="ml-auto bg-white text-brand-bg text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    {scenes.length}
-                </span>
+            <button className={getButtonClass('scenes')} onClick={handleScenesClick}>
+                <div className="flex items-center flex-1">
+                     <BookOpenIcon className="w-5 h-5 mr-3" />
+                     <span className="font-semibold">Editor de Cenas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="bg-white text-brand-bg text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {scenes.length}
+                    </span>
+                    <ChevronDownIcon className={`w-4 h-4 transition-transform ${isScenesExpanded ? 'rotate-0' : '-rotate-90'}`} />
+                </div>
             </button>
-            {currentView === 'scenes' && (
+            {currentView === 'scenes' && isScenesExpanded && (
               <div className="pl-4 pt-2 mt-2 border-l-2 border-brand-border/50 ml-2">
                 <SceneList scenes={scenes} {...sceneListProps} />
               </div>
@@ -62,6 +76,11 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         <button className={getButtonClass('map')} onClick={() => onSetView('map')}>
             <MapIcon className="w-5 h-5 mr-3" />
             <span className="font-semibold">Mapa de Cenas</span>
+        </button>
+
+        <button className={getButtonClass('variables')} onClick={() => onSetView('variables')}>
+            <AdjustmentsHorizontalIcon className="w-5 h-5 mr-3" />
+            <span className="font-semibold">Variáveis</span>
         </button>
       </nav>
       <div className="flex-shrink-0 mt-4 pt-4 border-t border-brand-border">

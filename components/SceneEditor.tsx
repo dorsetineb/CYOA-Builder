@@ -1,15 +1,23 @@
 
+
+
+
+
+
 // FIX: Added `useRef` to the React import statement.
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Scene, Choice } from '../types';
+import { Scene, Choice, Variable, SceneScript } from '../types';
 import ChoiceEditor from './InteractionEditor';
 import ConnectionsView from './ConnectionsView';
 import { UploadIcon } from './icons/UploadIcon';
 import { EyeIcon } from './icons/EyeIcon';
+import { PlusIcon } from './icons/PlusIcon';
+import { TrashIcon } from './icons/TrashIcon';
 
 interface SceneEditorProps {
   scene: Scene;
   allScenes: Scene[];
+  variables: Variable[];
   onUpdateScene: (scene: Scene) => void;
   onCopyScene: (scene: Scene) => void;
   onPreviewScene: (scene: Scene) => void;
@@ -26,6 +34,7 @@ const getCleanSceneState = (s: Scene): Scene => {
     removesChanceOnEntry: !!s.removesChanceOnEntry,
     restoresChanceOnEntry: !!s.restoresChanceOnEntry,
     choices: s.choices || [],
+    scripts: s.scripts || [],
   };
 };
 
@@ -34,9 +43,19 @@ export interface ConnectionDetail {
   choices: Choice[];
 }
 
+const OPERATORS = [
+    { value: '>', label: 'Maior que' },
+    { value: '<', label: 'Menor que' },
+    { value: '>=', label: 'Maior ou Igual' },
+    { value: '<=', label: 'Menor ou Igual' },
+    { value: '==', label: 'Igual a' },
+    { value: '!=', label: 'Diferente de' },
+];
+
 const SceneEditor: React.FC<SceneEditorProps> = ({ 
     scene, 
     allScenes, 
+    variables,
     onUpdateScene, 
     onCopyScene,
     onPreviewScene,
@@ -154,6 +173,36 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
           reader.readAsDataURL(e.target.files[0]);
       }
   };
+
+  // Scripts Handlers
+  const addScript = () => {
+      const newScript: SceneScript = { 
+          triggerCondition: { variableId: variables[0]?.id || '', operator: '>=', value: 1 },
+          goToScene: '' 
+      };
+      updateLocalScene('scripts', [...(localScene.scripts || []), newScript]);
+  };
+
+  const updateScript = (index: number, field: keyof SceneScript, value: any) => {
+      const updatedScripts = [...(localScene.scripts || [])];
+      updatedScripts[index] = { ...updatedScripts[index], [field]: value };
+      updateLocalScene('scripts', updatedScripts);
+  };
+
+  const updateScriptCondition = (index: number, field: any, value: any) => {
+    const updatedScripts = [...(localScene.scripts || [])];
+    const script = updatedScripts[index];
+    if (!script.triggerCondition) script.triggerCondition = { variableId: variables[0]?.id || '', operator: '>=', value: 1 };
+    
+    script.triggerCondition = { ...script.triggerCondition, [field]: value };
+    updateLocalScene('scripts', updatedScripts);
+  };
+
+  const removeScript = (index: number) => {
+      const updatedScripts = [...(localScene.scripts || [])];
+      updatedScripts.splice(index, 1);
+      updateLocalScene('scripts', updatedScripts);
+  };
   
   const handleSave = () => {
     onUpdateScene(localScene);
@@ -175,36 +224,24 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
   };
 
   const isAnyCheckboxChecked = !!localScene.isEndingScene || !!localScene.removesChanceOnEntry || !!localScene.restoresChanceOnEntry;
+  const otherScenes = allScenes.filter(s => s.id !== localScene.id);
 
   return (
     <div className="space-y-6 pb-24">
-      <div className="flex justify-between items-start">
-        <div>
-            <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-brand-text">Editor de Cena</h2>
-                <code
-                    className="bg-brand-bg px-2 py-1 rounded text-brand-primary-hover text-base align-middle"
-                    title={localScene.name}
-                >
-                    {localScene.name}
-                </code>
-                {isDirty && (
-                    <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse self-center" title="Alterações não salvas"></div>
-                )}
+      <div className="flex justify-end items-center gap-3">
+        {isDirty && (
+            <div className="flex items-center gap-2 text-yellow-400">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                <span className="text-xs font-medium">Alterações não salvas</span>
             </div>
-            <p className="text-brand-text-dim mt-1">
-            Defina a imagem, descrição e escolhas para esta cena.
-            </p>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0 mt-1">
-            <button
-                onClick={() => onCopyScene(localScene)}
-                className="flex items-center px-4 py-2 bg-brand-surface border border-brand-border text-brand-text font-semibold rounded-md hover:bg-brand-border/30 transition-colors"
-                title="Copiar Cena"
-            >
-                Copiar Cena
-            </button>
-        </div>
+        )}
+        <button
+            onClick={() => onCopyScene(localScene)}
+            className="flex items-center px-4 py-2 bg-brand-surface border border-brand-border text-brand-text font-semibold rounded-md hover:bg-brand-border/30 transition-colors text-sm"
+            title="Copiar Cena"
+        >
+            Copiar Cena
+        </button>
       </div>
 
       <div>
@@ -338,6 +375,67 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                               </label>
                           </div>
                       </div>
+
+                      {/* Scripts / Auto Events Section */}
+                      <div className="pt-6 mt-4 border-t border-brand-border/50">
+                          <div className="flex justify-between items-center mb-2">
+                             <h3 className="text-sm font-bold text-brand-text">Eventos Automáticos</h3>
+                             <button onClick={addScript} className="text-xs flex items-center gap-1 text-brand-primary hover:text-brand-primary-hover">
+                                 <PlusIcon className="w-3 h-3" /> Adicionar Evento
+                             </button>
+                          </div>
+                          <p className="text-xs text-brand-text-dim mb-3">Redireciona automaticamente se uma condição for atendida ao entrar na cena.</p>
+                          
+                          {localScene.scripts && localScene.scripts.length > 0 ? (
+                              <div className="space-y-3">
+                                  {localScene.scripts.map((script, idx) => (
+                                      <div key={idx} className="bg-brand-bg p-3 rounded border border-brand-border text-sm">
+                                          <div className="flex justify-between items-start mb-2">
+                                              <span className="text-brand-text font-semibold">Se...</span>
+                                              <button onClick={() => removeScript(idx)} className="text-red-400 hover:text-red-300"><TrashIcon className="w-4 h-4" /></button>
+                                          </div>
+                                          <div className="flex gap-2 mb-2 items-center">
+                                              <select 
+                                                  value={script.triggerCondition?.variableId}
+                                                  onChange={(e) => updateScriptCondition(idx, 'variableId', e.target.value)}
+                                                  className="bg-brand-surface border border-brand-border rounded px-2 py-1 w-1/3"
+                                              >
+                                                  {variables.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                                              </select>
+                                              <select
+                                                  value={script.triggerCondition?.operator}
+                                                  onChange={(e) => updateScriptCondition(idx, 'operator', e.target.value)}
+                                                  className="bg-brand-surface border border-brand-border rounded px-2 py-1 w-1/3"
+                                              >
+                                                  {OPERATORS.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
+                                              </select>
+                                              <input 
+                                                  type="number" 
+                                                  value={script.triggerCondition?.value}
+                                                  onChange={(e) => updateScriptCondition(idx, 'value', Number(e.target.value))}
+                                                  className="bg-brand-surface border border-brand-border rounded px-2 py-1 w-1/4"
+                                              />
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                              <span className="text-brand-text font-semibold">Ir para:</span>
+                                              <select
+                                                  value={script.goToScene}
+                                                  onChange={(e) => updateScript(idx, 'goToScene', e.target.value)}
+                                                  className="bg-brand-surface border border-brand-border rounded px-2 py-1 flex-grow"
+                                              >
+                                                  <option value="">Selecione uma cena...</option>
+                                                  {otherScenes.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                              </select>
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          ) : (
+                              <div className="text-center p-2 border border-dashed border-brand-border rounded">
+                                  <span className="text-xs text-brand-text-dim">Nenhum evento automático configurado.</span>
+                              </div>
+                          )}
+                      </div>
                   </div>
               </div>
           )}
@@ -348,6 +446,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                   onUpdateChoices={newChoices => updateLocalScene('choices', newChoices)}
                   allScenes={allScenes}
                   currentSceneId={localScene.id}
+                  variables={variables}
               />
           )}
 

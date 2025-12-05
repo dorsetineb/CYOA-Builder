@@ -1,13 +1,13 @@
 
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { GameData, Scene, Choice, View } from './types';
+import { GameData, Scene, View, Choice } from './types';
 import Sidebar from './components/Sidebar';
 import SceneEditor from './components/SceneEditor';
 import Header from './components/Header';
 import { WelcomePlaceholder } from './components/WelcomePlaceholder';
-import UIEditor from './components/UIEditor';
 import GameInfoEditor from './components/GameInfoEditor';
+import VariablesEditor from './components/VariablesEditor';
 import Preview from './components/Preview';
 import SceneMap from './components/SceneMap';
 
@@ -108,6 +108,8 @@ body.dark-theme {
     --input-bg: #010409;
     --button-bg: #21262d;
     --button-hover-bg: #30363d;
+    .choice-button { font-size: 1em; }
+    #diary-button { font-size: 1em; }
 }
 
 body.light-theme {
@@ -123,6 +125,8 @@ body.light-theme {
     --input-bg: #ffffff;
     --button-bg: #f6f8fa;
     --button-hover-bg: #e5e7eb;
+    .choice-button { font-size: 1em; }
+    #diary-button { font-size: 1em; }
 }
 
 :root {
@@ -400,7 +404,7 @@ body.with-spacing .main-wrapper {
     width: 100%;
     text-align: left;
     padding: 15px 20px;
-    font-size: 1.1em;
+    font-size: 1em;
     border: 2px solid var(--border-color);
     background-color: var(--button-bg);
     color: var(--text-color);
@@ -428,31 +432,13 @@ body.with-spacing .main-wrapper {
     color: var(--text-color);
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
-    font-size: 0.8em;
+    font-size: 1em;
 }
 
 #diary-button:hover {
     background-color: var(--border-color);
     border-color: var(--text-dim-color);
 }
-
-.btn-return-chance {
-    font-family: var(--font-family);
-    padding: 10px 15px;
-    border: 2px solid var(--border-color);
-    background-color: var(--panel-bg);
-    color: var(--text-color);
-    cursor: pointer;
-    transition: background-color 0.2s;
-    font-size: 0.9em;
-    margin-top: 20px;
-    display: inline-block;
-    border-radius: 4px;
-}
-.btn-return-chance:hover {
-    background-color: var(--border-color);
-}
-
 
 /* Diary Modal */
 .hidden { display: none !important; }
@@ -587,12 +573,12 @@ body.with-spacing .main-wrapper {
 
 /* Image Frame Styles */
 .frame-none .image-panel {
-    border: none;
+    border: none !important;
 }
 .frame-rounded-top .image-panel {
     padding: 10px;
     background: __FRAME_ROUNDED_TOP_COLOR__;
-    border: none;
+    border: none !important;
     border-radius: 150px 150px 6px 6px;
     box-shadow: none;
 }
@@ -604,7 +590,7 @@ body.with-spacing .main-wrapper {
 .frame-book-cover .image-panel {
     padding: 15px;
     background: var(--bg-color);
-    border: 10px solid __FRAME_BOOK_COLOR__;
+    border: 10px solid __FRAME_BOOK_COLOR__ !important;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 .frame-book-cover .image-container {
@@ -628,7 +614,7 @@ body.with-spacing .main-wrapper {
 .frame-chamfered .image-panel {
     padding: 10px;
     background: __FRAME_CHAMFERED_COLOR__;
-    border: none;
+    border: none !important;
     clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0 calc(100% - 15px), 0 15px);
 }
 .frame-chamfered .image-container {
@@ -874,6 +860,7 @@ const initializeGameData = (): GameData => {
         startScene: newStartScene,
         scenes: newScenes,
         sceneOrder: newSceneOrder,
+        variables: [], // Initialize empty variables
         gameHTML: gameHTML,
         gameCSS: gameCSS,
         gameTitle: "Fuga da Masmorra",
@@ -902,6 +889,8 @@ const initializeGameData = (): GameData => {
         gameChanceIcon: 'heart',
         gameChanceIconColor: '#ff4d4d',
         gameChanceReturnButtonText: "Tentar Novamente",
+        gameWonButtonText: "Você venceu!",
+        gameLostLastChanceButtonText: "Dessa vez, você perdeu",
         gameTheme: 'dark',
         gameTextColorLight: '#24292f',
         gameTitleColorLight: '#0969da',
@@ -936,6 +925,7 @@ const createNewGameData = (): GameData => {
         startScene: newSceneId,
         scenes: { [newSceneId]: newScene },
         sceneOrder: [newSceneId],
+        variables: [],
         gameHTML: gameHTML,
         gameCSS: gameCSS,
         gameTitle: "Meu Novo Jogo",
@@ -964,6 +954,8 @@ const createNewGameData = (): GameData => {
         gameChanceIcon: 'heart',
         gameChanceIconColor: '#ff4d4d',
         gameChanceReturnButtonText: "Tentar Novamente",
+        gameWonButtonText: "Você venceu!",
+        gameLostLastChanceButtonText: "Fim de Jogo",
         gameTheme: 'dark',
         gameTextColorLight: '#24292f',
         gameTitleColorLight: '#0969da',
@@ -1196,6 +1188,7 @@ const App: React.FC = () => {
             key={selectedScene.id}
             scene={selectedScene}
             allScenes={scenesInOrder}
+            variables={gameData.variables || []}
             onUpdateScene={handleUpdateScene}
             onCopyScene={handleCopyScene}
             onPreviewScene={handlePreviewSingleScene}
@@ -1207,11 +1200,26 @@ const App: React.FC = () => {
         ) : (
           <WelcomePlaceholder />
         );
-      case 'interface':
+      case 'game_info':
         return (
-          <UIEditor
-            html={gameData.gameHTML}
-            css={gameData.gameCSS}
+          <GameInfoEditor
+            title={gameData.gameTitle || 'Fuja da Masmorra'}
+            logo={gameData.gameLogo || ''}
+            omitSplashTitle={gameData.gameOmitSplashTitle || false}
+            splashImage={gameData.gameSplashImage || ''}
+            splashContentAlignment={gameData.gameSplashContentAlignment || 'right'}
+            splashDescription={gameData.gameSplashDescription || ''}
+            positiveEndingImage={gameData.positiveEndingImage || ''}
+            positiveEndingContentAlignment={gameData.positiveEndingContentAlignment || 'right'}
+            positiveEndingDescription={gameData.positiveEndingDescription || ''}
+            negativeEndingImage={gameData.negativeEndingImage || ''}
+            negativeEndingContentAlignment={gameData.negativeEndingContentAlignment || 'right'}
+            negativeEndingDescription={gameData.negativeEndingDescription || ''}
+            
+            // Variables - no longer used in GameInfoEditor but kept for type compat if needed
+            variables={gameData.variables}
+
+            // New props from merged UIEditor
             layoutOrientation={gameData.gameLayoutOrientation || 'vertical'}
             layoutOrder={gameData.gameLayoutOrder || 'image-first'}
             imageFrame={gameData.gameImageFrame || 'none'}
@@ -1232,6 +1240,8 @@ const App: React.FC = () => {
             gameFontFamily={gameData.gameFontFamily || "'Silkscreen', sans-serif"}
             chanceIcon={gameData.gameChanceIcon || 'heart'}
             chanceReturnButtonText={gameData.gameChanceReturnButtonText || ''}
+            gameWonButtonText={gameData.gameWonButtonText || ''}
+            gameLostLastChanceButtonText={gameData.gameLostLastChanceButtonText || ''}
             gameTheme={gameData.gameTheme || 'dark'}
             textColorLight={gameData.gameTextColorLight || '#24292f'}
             titleColorLight={gameData.gameTitleColorLight || '#0969da'}
@@ -1242,26 +1252,7 @@ const App: React.FC = () => {
             frameRoundedTopColor={gameData.frameRoundedTopColor || '#FFFFFF'}
             gameSceneNameOverlayBg={gameData.gameSceneNameOverlayBg || '#0d1117'}
             gameSceneNameOverlayTextColor={gameData.gameSceneNameOverlayTextColor || '#c9d1d9'}
-            onUpdate={handleUpdateGameData}
-            isDirty={isDirty}
-            onSetDirty={setIsDirty}
-          />
-        );
-      case 'game_info':
-        return (
-          <GameInfoEditor
-            title={gameData.gameTitle || 'Fuja da Masmorra'}
-            logo={gameData.gameLogo || ''}
-            omitSplashTitle={gameData.gameOmitSplashTitle || false}
-            splashImage={gameData.gameSplashImage || ''}
-            splashContentAlignment={gameData.gameSplashContentAlignment || 'right'}
-            splashDescription={gameData.gameSplashDescription || ''}
-            positiveEndingImage={gameData.positiveEndingImage || ''}
-            positiveEndingContentAlignment={gameData.positiveEndingContentAlignment || 'right'}
-            positiveEndingDescription={gameData.positiveEndingDescription || ''}
-            negativeEndingImage={gameData.negativeEndingImage || ''}
-            negativeEndingContentAlignment={gameData.negativeEndingContentAlignment || 'right'}
-            negativeEndingDescription={gameData.negativeEndingDescription || ''}
+            
             onUpdate={handleUpdateGameData}
             isDirty={isDirty}
             onSetDirty={setIsDirty}
@@ -1275,6 +1266,15 @@ const App: React.FC = () => {
             onSelectScene={handleSelectSceneAndSwitchView}
             onUpdateScenePosition={handleUpdateScenePosition}
             onAddScene={handleAddScene}
+          />
+        );
+      case 'variables':
+        return (
+          <VariablesEditor
+            variables={gameData.variables || []}
+            onUpdateVariables={(newVariables) => handleUpdateGameData('variables', newVariables)}
+            isDirty={isDirty}
+            onSetDirty={setIsDirty}
           />
         );
       default:

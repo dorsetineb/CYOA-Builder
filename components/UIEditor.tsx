@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { GameData } from '../types';
 
@@ -26,6 +25,8 @@ interface UIEditorProps {
   gameFontFamily: string;
   chanceIcon: 'circle' | 'cross' | 'heart';
   chanceReturnButtonText: string;
+  gameWonButtonText: string;
+  gameLostLastChanceButtonText: string;
   gameTheme: 'dark' | 'light';
   textColorLight: string;
   titleColorLight: string;
@@ -142,6 +143,8 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
       splashButtonTextColor, actionButtonColor, actionButtonTextColor,
       focusColor, chanceIconColor, gameFontFamily, chanceIcon,
       chanceReturnButtonText,
+      gameWonButtonText,
+      gameLostLastChanceButtonText,
       gameTheme, textColorLight, titleColorLight, focusColorLight,
       frameBookColor, frameTradingCardColor,
       frameChamferedColor,
@@ -174,6 +177,8 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
   const [localFontFamily, setLocalFontFamily] = useState(gameFontFamily);
   const [localChanceIcon, setLocalChanceIcon] = useState(chanceIcon);
   const [localChanceReturnButtonText, setLocalChanceReturnButtonText] = useState(chanceReturnButtonText);
+  const [localGameWonButtonText, setLocalGameWonButtonText] = useState(gameWonButtonText);
+  const [localGameLostLastChanceButtonText, setLocalGameLostLastChanceButtonText] = useState(gameLostLastChanceButtonText);
   const [localGameTheme, setLocalGameTheme] = useState(gameTheme);
   const [localTextColorLight, setLocalTextColorLight] = useState(textColorLight);
   const [localTitleColorLight, setLocalTitleColorLight] = useState(titleColorLight);
@@ -209,6 +214,8 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
     setLocalFontFamily(gameFontFamily);
     setLocalChanceIcon(chanceIcon);
     setLocalChanceReturnButtonText(chanceReturnButtonText);
+    setLocalGameWonButtonText(gameWonButtonText);
+    setLocalGameLostLastChanceButtonText(gameLostLastChanceButtonText);
     setLocalGameTheme(gameTheme);
     setLocalTextColorLight(textColorLight);
     setLocalTitleColorLight(titleColorLight);
@@ -222,7 +229,7 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
   }, [
     layoutOrientation, layoutOrder, imageFrame, splashButtonText, continueButtonText, restartButtonText, enableChances, maxChances,
     textColor, titleColor, splashButtonColor, splashButtonHoverColor, splashButtonTextColor, actionButtonColor, actionButtonTextColor, focusColor,
-    chanceIconColor, gameFontFamily, chanceIcon, chanceReturnButtonText, gameTheme, textColorLight, titleColorLight, focusColorLight,
+    chanceIconColor, gameFontFamily, chanceIcon, chanceReturnButtonText, gameWonButtonText, gameLostLastChanceButtonText, gameTheme, textColorLight, titleColorLight, focusColorLight,
     frameBookColor, frameTradingCardColor, frameChamferedColor,
     frameRoundedTopColor, gameSceneNameOverlayBg, gameSceneNameOverlayTextColor
   ]);
@@ -256,6 +263,8 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
                   localFontFamily !== gameFontFamily ||
                   localChanceIcon !== chanceIcon ||
                   localChanceReturnButtonText !== chanceReturnButtonText ||
+                  localGameWonButtonText !== gameWonButtonText ||
+                  localGameLostLastChanceButtonText !== gameLostLastChanceButtonText ||
                   localGameTheme !== gameTheme ||
                   localTextColorLight !== textColorLight ||
                   localTitleColorLight !== titleColorLight ||
@@ -269,7 +278,7 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
     onSetDirty(dirty);
   }, [
     localLayoutOrientation, localLayoutOrder, localImageFrame, localSplashButtonText, localContinueButtonText, localRestartButtonText, localEnableChances, localMaxChances,
-    localTextColor, localTitleColor, localSplashButtonColor, localSplashButtonHoverColor, localSplashButtonTextColor, localActionButtonColor, localActionButtonTextColor, localFocusColor, localChanceIconColor, localFontFamily, localChanceIcon, localChanceReturnButtonText, localGameTheme, localTextColorLight, localTitleColorLight, localFocusColorLight,
+    localTextColor, localTitleColor, localSplashButtonColor, localSplashButtonHoverColor, localSplashButtonTextColor, localActionButtonColor, localActionButtonTextColor, localFocusColor, localChanceIconColor, localFontFamily, localChanceIcon, localChanceReturnButtonText, localGameWonButtonText, localGameLostLastChanceButtonText, localGameTheme, localTextColorLight, localTitleColorLight, localFocusColorLight,
     localFrameBookColor, localFrameTradingCardColor, localFrameChamferedColor,
     frameRoundedTopColor, localGameSceneNameOverlayBg, localGameSceneNameOverlayTextColor,
     props, onSetDirty
@@ -296,6 +305,8 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
     if (localFontFamily !== gameFontFamily) onUpdate('gameFontFamily', localFontFamily);
     if (localChanceIcon !== chanceIcon) onUpdate('gameChanceIcon', localChanceIcon);
     if (localChanceReturnButtonText !== chanceReturnButtonText) onUpdate('gameChanceReturnButtonText', localChanceReturnButtonText);
+    if (localGameWonButtonText !== gameWonButtonText) onUpdate('gameWonButtonText', localGameWonButtonText);
+    if (localGameLostLastChanceButtonText !== gameLostLastChanceButtonText) onUpdate('gameLostLastChanceButtonText', localGameLostLastChanceButtonText);
     if (localGameTheme !== gameTheme) onUpdate('gameTheme', localGameTheme);
     if (localTextColorLight !== textColorLight) onUpdate('gameTextColorLight', localTextColorLight);
     if (localTitleColorLight !== titleColorLight) onUpdate('gameTitleColorLight', localTitleColorLight);
@@ -329,6 +340,8 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
     setLocalFontFamily(gameFontFamily);
     setLocalChanceIcon(chanceIcon);
     setLocalChanceReturnButtonText(chanceReturnButtonText);
+    setLocalGameWonButtonText(gameWonButtonText);
+    setLocalGameLostLastChanceButtonText(gameLostLastChanceButtonText);
     setLocalGameTheme(gameTheme);
     setLocalTextColorLight(textColorLight);
     setLocalTitleColorLight(titleColorLight);
@@ -559,7 +572,7 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
                       </div>
                       {localEnableChances && (
                           <div className="mt-4 pl-6 border-l-2 border-brand-border/50">
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4 pt-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-4">
                                   <div>
                                       <label htmlFor="maxChances" className="block text-sm font-medium text-brand-text-dim mb-1">Número de Chances</label>
                                       <input
@@ -585,17 +598,6 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
                                           <option value="cross">Cruzes</option>
                                       </select>
                                   </div>
-                                  <div>
-                                      <label htmlFor="chanceReturnButton" className="block text-sm font-medium text-brand-text-dim mb-1">Texto do Botão de Retorno</label>
-                                      <input
-                                          type="text"
-                                          id="chanceReturnButton"
-                                          value={localChanceReturnButtonText}
-                                          onChange={(e) => setLocalChanceReturnButtonText(e.target.value)}
-                                          className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 focus:ring-0"
-                                      />
-                                      <p className="text-xs text-brand-text-dim mt-1">Aparece após perder uma chance.</p>
-                                  </div>
                               </div>
                           </div>
                       )}
@@ -609,7 +611,7 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
                       <h3 className="text-lg font-semibold text-brand-text mb-4">Textos dos Botões</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                           <div>
-                              <label htmlFor="splashButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Texto do Botão de Início</label>
+                              <label htmlFor="splashButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Início</label>
                               <input
                                   type="text"
                                   id="splashButtonText"
@@ -620,7 +622,7 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
                               />
                           </div>
                           <div>
-                              <label htmlFor="continueButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Texto do Botão de Continuar</label>
+                              <label htmlFor="continueButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Continuar</label>
                               <input
                                   type="text"
                                   id="continueButtonText"
@@ -631,7 +633,7 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
                               />
                           </div>
                           <div>
-                              <label htmlFor="restartButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Texto do Botão de Reiniciar (Fim de Jogo)</label>
+                              <label htmlFor="restartButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Reiniciar (Fim de Jogo)</label>
                               <input
                                   type="text"
                                   id="restartButtonText"
@@ -639,6 +641,46 @@ const UIEditor: React.FC<UIEditorProps> = (props) => {
                                   onChange={(e) => setLocalRestartButtonText(e.target.value)}
                                   className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 focus:ring-0"
                                   placeholder="Reiniciar Aventura"
+                              />
+                          </div>
+                          {localEnableChances && (
+                            <div>
+                                <label htmlFor="chanceReturnButton" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Tentar Novamente</label>
+                                <p className="text-xs text-brand-text-dim mb-2">Aparece após perder uma chance.</p>
+                                <input
+                                    type="text"
+                                    id="chanceReturnButton"
+                                    value={localChanceReturnButtonText}
+                                    onChange={(e) => setLocalChanceReturnButtonText(e.target.value)}
+                                    className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 focus:ring-0"
+                                    placeholder="Tentar Novamente"
+                                />
+                            </div>
+                          )}
+                           {localEnableChances && (
+                            <div>
+                                <label htmlFor="gameLostLastChanceButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Perda Final</label>
+                                <p className="text-xs text-brand-text-dim mb-2">Aparece ao perder a última chance.</p>
+                                <input
+                                    type="text"
+                                    id="gameLostLastChanceButtonText"
+                                    value={localGameLostLastChanceButtonText}
+                                    onChange={(e) => setLocalGameLostLastChanceButtonText(e.target.value)}
+                                    className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 focus:ring-0"
+                                    placeholder="Dessa vez, você perdeu"
+                                />
+                            </div>
+                          )}
+                          <div>
+                              <label htmlFor="gameWonButtonText" className="block text-sm font-medium text-brand-text-dim mb-1">Botão de Vitória</label>
+                              <p className="text-xs text-brand-text-dim mb-2">Aparece na cena final de vitória.</p>
+                              <input
+                                  type="text"
+                                  id="gameWonButtonText"
+                                  value={localGameWonButtonText}
+                                  onChange={(e) => setLocalGameWonButtonText(e.target.value)}
+                                  className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 focus:ring-0"
+                                  placeholder="Você venceu!"
                               />
                           </div>
                       </div>

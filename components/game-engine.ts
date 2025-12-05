@@ -1,3 +1,6 @@
+
+
+
 import { GameData, Scene } from '../types';
 
 export const prepareGameDataForEngine = (data: GameData): object => {
@@ -10,11 +13,14 @@ export const prepareGameDataForEngine = (data: GameData): object => {
     return {
         cena_inicial: data.startScene,
         cenas: scenesForEngine,
+        variables: data.variables, // Pass variables definition
         gameEnableChances: data.gameEnableChances,
         gameMaxChances: data.gameMaxChances,
         gameChanceIcon: data.gameChanceIcon,
         gameChanceIconColor: data.gameChanceIconColor,
         gameChanceReturnButtonText: data.gameChanceReturnButtonText,
+        gameWonButtonText: data.gameWonButtonText,
+        gameLostLastChanceButtonText: data.gameLostLastChanceButtonText,
         gameTheme: data.gameTheme,
         gameTextColorLight: data.gameTextColorLight,
         gameTitleColorLight: data.gameTitleColorLight,
@@ -76,8 +82,53 @@ document.addEventListener('DOMContentLoaded', () => {
         diaryLog: [],
         scenesState: {},
         chances: null,
+        variables: {},
     };
     let onRenderCompleteCallback = null;
+
+    // --- Logic Helpers ---
+
+    function checkCondition(condition) {
+        if (!condition || !condition.variableId) return true;
+        
+        const currentVal = currentState.variables[condition.variableId] !== undefined 
+            ? currentState.variables[condition.variableId] 
+            : 0;
+            
+        const targetVal = condition.value;
+        
+        switch (condition.operator) {
+            case '>': return currentVal > targetVal;
+            case '<': return currentVal < targetVal;
+            case '>=': return currentVal >= targetVal;
+            case '<=': return currentVal <= targetVal;
+            case '==': return currentVal === targetVal;
+            case '!=': return currentVal !== targetVal;
+            default: return true;
+        }
+    }
+
+    function applyEffects(effects) {
+        if (!effects || effects.length === 0) return;
+        
+        effects.forEach(effect => {
+            const currentVal = currentState.variables[effect.variableId] !== undefined 
+                ? currentState.variables[effect.variableId] 
+                : 0;
+            
+            let newVal = currentVal;
+            
+            if (effect.operation === 'add') {
+                newVal += effect.value;
+            } else if (effect.operation === 'subtract') {
+                newVal -= effect.value;
+            } else if (effect.operation === 'set') {
+                newVal = effect.value;
+            }
+            
+            currentState.variables[effect.variableId] = newVal;
+        });
+    }
 
     // --- Game Logic ---
     function saveState() {
@@ -97,6 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const parsedData = JSON.parse(savedData);
                 if (parsedData.currentSceneId && parsedData.scenesState) {
                     currentState = parsedData;
+                    // Ensure variables exist in loaded state
+                    if (!currentState.variables) currentState.variables = {};
                     return true;
                 }
             }
@@ -165,6 +218,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
+        // --- AUTO-REDIRECT LOGIC (Scene Scripts) ---
+        if (scene.scripts && scene.scripts.length > 0) {
+            for (let script of scene.scripts) {
+                 if (script.triggerCondition && checkCondition(script.triggerCondition)) {
+                     // Condition met, redirect immediately
+                     // Use setTimeout to avoid recursion depth issues if many auto-jumps happen
+                     setTimeout(() => changeScene(script.goToScene, isStateLoad), 0);
+                     return; 
+                 }
+            }
+        }
+        
         onRenderCompleteCallback = null;
         if(choicesContainer) choicesContainer.innerHTML = '';
 
@@ -176,7 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!isStateLoad) {
             if (scene.isEndingScene) {
-                onRenderCompleteCallback = () => showEnding('positive');
+                onRenderCompleteCallback = () => {
+                    const winButton = document.createElement('button');
+                    winButton.textContent = gameData.gameWonButtonText || "você venceu";
+                    winButton.className = 'choice-button';
+                    winButton.style.textAlign = 'center';
+                    winButton.onclick = () => showEnding('positive');
+                    if (choicesContainer) choicesContainer.appendChild(winButton);
+                };
             } else if (gameData.gameEnableChances) {
                 if (scene.removesChanceOnEntry) {
                     currentState.chances--;
@@ -184,8 +256,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (currentState.chances <= 0) {
                         onRenderCompleteCallback = () => {
                             const gameOverButton = document.createElement('button');
-                            gameOverButton.textContent = "dessa vez, você perdeu";
-                            gameOverButton.className = 'btn-return-chance';
+                            gameOverButton.textContent = gameData.gameLostLastChanceButtonText || "dessa vez, você perdeu";
+                            gameOverButton.className = 'choice-button';
+                            gameOverButton.style.textAlign = 'center';
                             gameOverButton.onclick = () => showEnding('negative');
                             if (choicesContainer) choicesContainer.appendChild(gameOverButton);
                         };
@@ -193,7 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         onRenderCompleteCallback = () => {
                             const returnButton = document.createElement('button');
                             returnButton.textContent = gameData.gameChanceReturnButtonText || 'Tentar Novamente';
-                            returnButton.className = 'btn-return-chance';
+                            returnButton.className = 'choice-button';
+                            returnButton.style.textAlign = 'center';
                             returnButton.onclick = () => performSceneChange(currentState.previousSceneId);
                             if (choicesContainer) choicesContainer.appendChild(returnButton);
                         };
@@ -252,10 +326,20 @@ document.addEventListener('DOMContentLoaded', () => {
             onRenderCompleteCallback = null;
         } else {
             scene.choices.forEach(choice => {
+                // CHECK CONDITION
+                if (choice.reqCondition && !checkCondition(choice.reqCondition)) {
+                    return; // Skip rendering this choice
+                }
+
                 const button = document.createElement('button');
                 button.className = 'choice-button';
                 button.textContent = choice.text;
                 button.onclick = () => {
+                    // APPLY EFFECTS
+                    if (choice.effects) {
+                        applyEffects(choice.effects);
+                    }
+                
                     currentState.diaryLog.push({ type: 'choice', data: { text: choice.text, from: scene.id, to: choice.goToScene } });
                     performSceneChange(choice.goToScene, choice.soundEffect, choice.transitionType);
                 };
@@ -393,6 +477,15 @@ document.addEventListener('DOMContentLoaded', () => {
             currentState.previousSceneId = null;
             currentState.diaryLog = [];
             currentState.scenesState = JSON.parse(JSON.stringify(originalScenes));
+            
+            // Initialize Variables
+            currentState.variables = {};
+            if (gameData.variables) {
+                gameData.variables.forEach(v => {
+                    currentState.variables[v.id] = v.initialValue;
+                });
+            }
+
             if (gameData.gameEnableChances) {
                 currentState.chances = gameData.gameMaxChances;
             }

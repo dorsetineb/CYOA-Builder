@@ -1,11 +1,37 @@
 
 
+export interface Variable {
+  id: string;
+  name: string;
+  initialValue: number;
+  type: 'number'; // Por enquanto, suporte apenas a números para simplificar a UI
+}
+
+export interface Condition {
+  variableId: string;
+  operator: '>' | '<' | '>=' | '<=' | '==' | '!=';
+  value: number;
+}
+
+export interface Effect {
+  variableId: string;
+  operation: 'add' | 'subtract' | 'set';
+  value: number;
+}
+
+export interface SceneScript {
+  triggerCondition?: Condition;
+  goToScene: string;
+}
+
 export interface Choice {
   id: string;
   text: string;
   goToScene?: string; // ID of the scene to move to
   soundEffect?: string; // base64 data URL for interaction sound
   transitionType?: 'none' | 'fade' | 'wipe-down' | 'wipe-up' | 'wipe-left' | 'wipe-right';
+  reqCondition?: Condition; // A escolha só aparece se a condição for verdadeira
+  effects?: Effect[]; // Efeitos aplicados ao escolher
 }
 
 // FIX: Added the missing Exits interface required by ExitsEditor.tsx.
@@ -27,6 +53,7 @@ export interface Scene {
   isEndingScene?: boolean;
   removesChanceOnEntry?: boolean;
   restoresChanceOnEntry?: boolean;
+  scripts?: SceneScript[]; // Eventos automáticos ao entrar na cena
   mapX?: number;
   mapY?: number;
 }
@@ -37,6 +64,7 @@ export interface GameData {
     [id: string]: Scene;
   };
   sceneOrder: string[];
+  variables: Variable[]; // Lista de variáveis globais
   gameHTML: string;
   gameCSS: string;
   gameTitle?: string;
@@ -65,6 +93,8 @@ export interface GameData {
   gameChanceIcon?: 'circle' | 'cross' | 'heart';
   gameChanceIconColor?: string;
   gameChanceReturnButtonText?: string;
+  gameWonButtonText?: string;
+  gameLostLastChanceButtonText?: string;
   gameTheme?: 'dark' | 'light';
   gameTextColorLight?: string;
   gameTitleColorLight?: string;
@@ -83,4 +113,4 @@ export interface GameData {
   gameSceneNameOverlayTextColor?: string;
 }
 
-export type View = 'scenes' | 'interface' | 'game_info' | 'map';
+export type View = 'scenes' | 'game_info' | 'map' | 'variables';
